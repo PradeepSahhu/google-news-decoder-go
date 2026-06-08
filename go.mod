@@ -1,4 +1,4 @@
-module google-news-decoder
+module github.com/PradeepSahhu/google-news-decoder-go
 
 go 1.25.0
 

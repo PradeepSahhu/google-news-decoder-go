@@ -1,4 +1,4 @@
-package main
+package googlenewsdecoder
 
 import (
 	"encoding/json"
@@ -8,11 +8,12 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
+
+const defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
 
 type GoogleDecoder struct {
 	Client *http.Client
@@ -68,7 +69,7 @@ func (d *GoogleDecoder) getDecodingParamsFromURL(reqURL string) (*DecodingParams
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36")
+	req.Header.Set("User-Agent", defaultUserAgent)
 
 	resp, err := d.Client.Do(req)
 	if err != nil {
@@ -152,7 +153,7 @@ func (d *GoogleDecoder) DecodeUrl(signature, timestamp, base64Str string) (strin
 	}
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8")
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36")
+	req.Header.Set("User-Agent", defaultUserAgent)
 
 	resp, err := d.Client.Do(req)
 	if err != nil {
@@ -233,32 +234,4 @@ func (d *GoogleDecoder) DecodeGoogleNewsUrl(sourceURL string, interval time.Dura
 	}
 
 	return decodedURL, nil
-}
-
-func main() {
-	decoder, err := NewGoogleDecoder("")
-	if err != nil {
-		panic(err)
-	}
-
-	sourceURL1 := "https://news.google.com/rss/articles/CBMi3gFBVV95cUxPajlzYVZfQzAwZHN0ekdHN2wtMTUzeTQ1ZVJqVDl2T2E0d1JtM0FSdUNac2VNMldVNmwzc2tVOUZtdWNCbkNpaUUwSll4cU9XTnlnNk1xeDlfaHRqMEJoUFVVeFBScVFmUjFMaEp1cTZvSmlxYWo2dWxGQ0gwcElGVlp6YjA2WTRCb3F1cVg2SDFFb25LWHlPT0NVZXFFSWFuWXZRNnVPcWNQUnRGYzhqUmJDYkJ5TTYwTm9pcVctWngteWRid0Vsa2JtS19lY2pUb1lPOTlZN1lLWWV0VXfSAeMBQVVfeXFMT1N6eGpRYS13Y0tnc1RQUlBaTG9PMkdQSnB2OFN2dTVOa2tyMVZQT0MyQ3EzbjNHNndySG1Sb3RJTFFyWG1SLUZTUF9FS3NoYktjWWV0djJhMlBncTBvTmowVEhHenpITG4zZzlqeDU4LUo2ci1NSldXdGpzMFNucV9pRkRxNTYxUzRzUExLR1V4aEVyRnNGajhnd2dZTlNNZndscmhUUDlDbEp1YlRlRF9PQU80LWFuTEV0NHA0eEEwVk1fTXVQaTB3S0xKXzFuckFoaTFVVV9VRkFWYjNuYXhwUFU?oc=5"
-	sourceURL2 := "https://news.google.com/rss/articles/CBMiqwFBVV95cUxNMTRqdUZpNl9hQldXbGo2YVVLOGFQdkFLYldlMUxUVlNEaElsYjRRODVUMkF3R1RYdWxvT1NoVzdUYS0xSHg3eVdpTjdVODQ5cVJJLWt4dk9vZFBScVp2ZmpzQXZZRy1ncDM5c2tRbXBVVHVrQnpmMGVrQXNkQVItV3h4dVQ1V1BTbjhnM3k2ZUdPdnhVOFk1NmllNTZkdGJTbW9NX0k5U3E2Tkk?oc=5"
-
-	urls := []string{sourceURL1, sourceURL2}
-	var wg sync.WaitGroup
-
-	for _, u := range urls {
-		wg.Add(1)
-		go func(urlStr string) {
-			defer wg.Done()
-			decoded, err := decoder.DecodeGoogleNewsUrl(urlStr, 0)
-			if err != nil {
-				fmt.Printf("Error decoding %s: %v\n", urlStr, err)
-			} else {
-				fmt.Printf("Decoded URL: %s\n", decoded)
-			}
-		}(u)
-	}
-
-	wg.Wait()
 }
