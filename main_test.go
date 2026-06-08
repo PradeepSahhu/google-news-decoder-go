@@ -1,5 +1,4 @@
 package googlenewsdecoder
-package googlenewsdecoder
 
 import "testing"
 
